@@ -1,0 +1,104 @@
+------------------------------------------------------------
+- Ken Withee                                               -
+- CSEP 561: Network Systems, Spring 2017                   -
+- Assignment 1 - Buffer Bloat                              -
+------------------------------------------------------------
+
+
+------------------------------------------------------------
+- Instructions                                             -
+------------------------------------------------------------
+/bin/tar -xvzf CSEP561_withee_assignment1.tar.gz 
+cd CSEP561_withee_assignment1/ 
+/usr/bin/sudo ./run.sh
+------------------------------------------------------------
+
+
+------------------------------------------------------------
+- Average and Standard Deviation for fetch times are       -
+- displayed in output.                                     -
+-                                                          -
+- A recent test yielded:                                   -
+- 20 packet buffer: avg appr. 3.13, std. dev appr. 0.63    -
+- 100 packet buffer: avg appr. 9.07, std. dev appr. 9.07   -
+------------------------------------------------------------
+
+
+------------------------------------------------------------
+-              TRAFFIC FLOW DETAILS                        -
+------------------------------------------------------------
+-                  Traffic Flow                            -
+- IPERF                 client (h1) -->  server       (h2) -
+- PING                start on (h1) -->  respond from (h2) -
+- HTML Download     web server (h1) -->  server       (h2) -
+------------------------------------------------------------
+
+
+------------------------------------------------------------
+- ANSWERS TO QUESTIONS:                                    -
+------------------------------------------------------------
+
+Question 1: Why do you see a difference in web page fetch 
+   times with short and large router buffers?
+
+Answer 1: With a 100 buffer the average fetch time was over
+   8 seconds. With the 20 buffer the average fetch time was
+   around 4 seconds. With the larger buffer the RTT time
+   was much higher and packets seemed to get stuck in the 
+   buffer. I suspect this is because the buffer was not 
+   dropping any packets so the congestion window cwnd 
+   didn't decrease the way it did with the lower buffer.
+   
+
+Question 2: Bufferbloat can occur in other places such as 
+   your network interface card (NIC). Check the output of 
+   ifconfig eth0 on the VM. What is the (maximum) transmit 
+   queue length on the network interface reported by 
+   ifconfig? For this queue size, if you assume a queue 
+   drains at 100 Mb/s, what is the maximum time a packet 
+   might wait in the queue before it leaves the NIC?
+
+Answer 2: The ifconfig command displays the transmit queue 
+   length maximum (txqueuelen) at 1000 Ethernet frames. This 
+   means that 1000 frames can be queued in the buffer at a 
+   time. If we assume a frame size of 1500 bytes then the 
+   buffer will have a total of 1500 * 1000 = 1,500,000 
+   bytes = 12,000,000 bits or around 12 Megabits. If the NIC 
+   drains at 100 Megabits per second then a full queue could 
+   take 120 milliseconds to drain the full queue.
+   
+
+Question 3: How does the RTT reported by ping vary with the 
+   queue size? Write a symbolic equation to describe the 
+   relationship between the two (ignore computational 
+   overhead in ping that might affect the final result).
+
+Answer 3:
+   With a queue size of 20 the RTT time bounces up and down
+   between roughly 180 and 280. When the queue size is 
+   increased to 100 the RTT time increases steadily to 1500 
+   as the queue fills up and then drops down to around 800 
+   as the algorithm kicks in and slows down the sending of 
+   packets. The RTT is high because the buffer takes time 
+   to drain and packets are spending time going through the 
+   large queue size. A formula for this looks to be around 
+   the queue size (q) times 8 yields roughly the average 
+   round trip time. q*8 ~ = avg RTT.
+
+
+Question 4: Identify and describe two ways to mitigate the 
+   bufferbloat problem.
+
+Answer 4:
+   The first method to mitigate bufferbloat is to reduce the
+   queue size of the buffer. The problem usually is 
+   experienced at the edge of the network where bandwidth has 
+   a large descrepency. The second way to mitigate bufferbloat
+   is to reduce the bandwidth on the local network. For 
+   example, if a local network has gigabit connections but the 
+   ISP only provides much lower bandwidth then reducing the 
+   local net badwidth can reduce the packets flowing into the 
+   buffer. This would provide a small cost for throughput but 
+   the latency caused by bufferbloat would improve.  The 
+   second method that could be used is to lower the timeout 
+   for a lost packet. 
