@@ -1,0 +1,17 @@
+Metadata-Version: 1.1
+Name: cs561
+Version: 0.0.0
+Summary: Network controller for UW CS561 based on Stanford CS144 Lab
+Home-page: https://courses.cs.washington.edu/courses/csep561/17sp/
+Author: CS561 TA
+Author-email: mgliu@cs.washington.edu
+License: GPL
+Description: Insert longer description here.
+              
+Keywords: uw cs561
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Internet

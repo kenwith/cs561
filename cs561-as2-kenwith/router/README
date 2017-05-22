@@ -1,0 +1,70 @@
+------------------------------------------------------------
+- Ken Withee                                               -
+- CSEP 561: Network Systems, Spring 2017                   -
+- Assignment 2 - Simple Router                             -
+------------------------------------------------------------
+
+--- INSTRUCTIONS ---
+1. tar -xvzf cs561-as2-kenwith.tar.gz
+2. cd cs561-as2-kenwith
+3. sudo ./run_all.sh
+4. ./router/sr
+
+--- IMPLEMENTATION ---
+The main logic for the router is in the sr_router.c file. Each time
+a packet arrives the sr_handlepacket is called. The sr_handlepacket 
+then looks to determine if the packet is an ARP or an IP packet.
+The sr_handlepacket function then calls deal_ip or deal_arp accordingly.
+If the router does not know the Ethernet address for an IP it sends
+out a broadcast ARP Request. It then puts the packet on the queue
+until it receives a reply. When an ARP Reply comes back it looks
+at the queue for that particular IP/MAC mapping and sends all of
+the packets waiting for that mapping out on the appropriate interface.
+Every second the ARP request queue is run and an ARP request is sent
+for any outstanding requests. If a request has been sent at least 5 
+times then then an ICMP error is sent to all packets in that queue.
+The logic for the arp requests is in sr_arpcache.c. All header files
+contain more details information for each function. Each function is
+also provided with a header that describes the details of the function.
+
+--- SPECIAL TESTING CASES ---
+As with any software there are bound to be bugs. The only testing
+performed on this router is that described in section 6.0 of the
+project assignment paper.
+
+To view with TCPDUMP:
+sudo tcpdump -n -e -K -s0 -i <interface>
+-n is to disable lookup of host and port names
+-K is to deal with network interface card  offloading of checksums.
+-e is to show the Ethernet headers (MAC addresses)
+-s0 is to grab all of the packet and not truncate
+-i is for the interface
+Other flags may be useful, see 'man tcpdump' for details.
+
+--- HIGH-LEVEL DESIGN ---
+In this program a 'packet' actually contains extra headers. The c packet 
+header is for the POX controller. The Ethernet header is where we see
+the normal packet. The ARP header is for the arp packet.
+
+C_PACKET_HEADER
+   ETHERNET_HEADER
+      ARP_HEADER
+
+However, we don't need to worry about the c packet header. We see IP 
+packets arrive they are inside of ETHERNET_HEADER (Ethernet Frame).
+
+To see the details of ETHERNET FRAME:
+- go to www.networksorcery.com > Protocols > IEEE 802.3, Ethernet.
+
+To see details of ARP PACKET:
+- go to www.networksorcery.com > Protocols > ARP.
+
+For details on conversion of host to network and vice versa:
+- http://beej.us/guide/bgnet/output/html/multipage/htonsman.html
+
+Routing table format:
+
+Destination    Gateway        Mask              Interface          
+0.0.0.0        10.0.1.1       0.0.0.0           eth3
+192.168.2.2    192.168.2.2    255.255.255.255   eth1
+172.64.3.10    172.64.3.10    255.255.255.255   eth2
